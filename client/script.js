@@ -21,6 +21,7 @@ function loader(element){
 
 function typeText(element, text){
   let index = 0;
+  element.innerHTML = '';
 
   let interval = setInterval(() => {
     if(index < text.length){
