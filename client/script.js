@@ -3,7 +3,50 @@ import user from './assets/user.svg';
 
 const form = document.querySelector('form');
 const chatContainer = document.querySelector('#chat_container');
+
+// For storing messages to be used for context in the bot
 const messageList = new PersistentMessageList('messageList');
+
+class Message {
+  constructor(role, content) {
+    this.role = role;
+    this.content = content;
+  }
+}
+
+class PersistentMessageList {
+  constructor(storageKey) {
+    this.storageKey = storageKey;
+    this.initStorage();
+  }
+
+  initStorage() {
+    if (!localStorage.getItem(this.storageKey)) {
+      localStorage.setItem(this.storageKey, JSON.stringify([]));
+    }
+  }
+
+  addMessage(role, content) {
+    const message = new Message(role, content);
+    const currentList = this.getMessages();
+    currentList.push(message);
+    localStorage.setItem(this.storageKey, JSON.stringify(currentList));
+  }
+
+  removeMessage(index) {
+    const currentList = this.getMessages();
+    if (index >= 0 && index < currentList.length) {
+      currentList.splice(index, 1);
+      localStorage.setItem(this.storageKey, JSON.stringify(currentList));
+    } else {
+      console.error('Invalid index');
+    }
+  }
+
+  getMessages() {
+    return JSON.parse(localStorage.getItem(this.storageKey));
+  }
+}
 
 let loadInterval;
 
@@ -123,45 +166,3 @@ form.addEventListener('keyup', (e) => {
     handleSubmit(e);
   }
 })
-
-// For storing messages to be used for context in the bot
-class Message {
-  constructor(role, content) {
-    this.role = role;
-    this.content = content;
-  }
-}
-
-class PersistentMessageList {
-  constructor(storageKey) {
-    this.storageKey = storageKey;
-    this.initStorage();
-  }
-
-  initStorage() {
-    if (!localStorage.getItem(this.storageKey)) {
-      localStorage.setItem(this.storageKey, JSON.stringify([]));
-    }
-  }
-
-  addMessage(role, content) {
-    const message = new Message(role, content);
-    const currentList = this.getMessages();
-    currentList.push(message);
-    localStorage.setItem(this.storageKey, JSON.stringify(currentList));
-  }
-
-  removeMessage(index) {
-    const currentList = this.getMessages();
-    if (index >= 0 && index < currentList.length) {
-      currentList.splice(index, 1);
-      localStorage.setItem(this.storageKey, JSON.stringify(currentList));
-    } else {
-      console.error('Invalid index');
-    }
-  }
-
-  getMessages() {
-    return JSON.parse(localStorage.getItem(this.storageKey));
-  }
-}
