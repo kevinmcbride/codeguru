@@ -5,7 +5,6 @@ const form = document.querySelector('form');
 const chatContainer = document.querySelector('#chat_container');
 
 // For storing messages to be used for context in the bot
-const messageList = new PersistentMessageList('messageList');
 
 class Message {
   constructor(role, content) {
@@ -46,7 +45,15 @@ class PersistentMessageList {
   getMessages() {
     return JSON.parse(localStorage.getItem(this.storageKey));
   }
+
+  resetStorage() {
+    localStorage.removeItem(this.storageKey);
+    this.initStorage();
+  }
 }
+
+const messageList = new PersistentMessageList('messageList');
+//messageList.resetStorage();
 
 let loadInterval;
 
@@ -115,10 +122,14 @@ const handleSubmit = async (e) => {
   //user's chatstripe
   chatContainer.innerHTML += chatStripe(false, data.get('prompt'));
 
-  // Usage
-
-  messageList.addMessage('user', data.get('prompt'));
-  console.log(messageList.getMessages()); 
+  if(data.get('prompt').trim() === 'New Chat'){
+    messageList.resetStorage();
+    console.log(messageList.getMessages());
+  } else {
+      // store user prompt in local storage
+    messageList.addMessage('user', data.get('prompt'));
+    console.log(messageList.getMessages()); 
+  }
 
   form.reset();
 
@@ -132,14 +143,22 @@ const handleSubmit = async (e) => {
 
   loader(messageDiv);
 
+  const messages = messageList.getMessages();
+  const promptMessages = messages.map((message) => {
+    return {role: message.role, content: message.content};
+  });
+  console.log(promptMessages);
+
   // fetch data from server
   const response = await fetch('https://codeguru-q6df.onrender.com', {
+  //const response = await fetch('http://localhost:5000', {
     method: 'POST', 
     headers: {
       'Content-Type' : 'application/json'
     },
     body: JSON.stringify({
-      prompt: data.get('prompt')
+      //prompt: data.get('prompt')      
+      prompt: promptMessages
     })
   })
 
@@ -149,7 +168,7 @@ const handleSubmit = async (e) => {
   if(response.ok) {
     const data = await response.json();
     const parsedData = data.bot.trim();
-    messageList.addMessage('bot', parsedData);
+    messageList.addMessage('assistant', parsedData);
     console.log(messageList.getMessages()); 
 
     typeText(messageDiv, parsedData);
