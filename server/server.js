@@ -57,3 +57,53 @@ app.post('/', async (req, res) => {
 })
 
 app.listen(5000, () => console.log('Server is running on port http://localhost:5000'));
+
+class Message {
+    constructor(role, content) {
+      this.role = role;
+      this.content = content;
+    }
+  }
+  
+  class PersistentMessageList {
+    constructor(storageKey) {
+      this.storageKey = storageKey;
+      this.initStorage();
+    }
+  
+    initStorage() {
+      if (!localStorage.getItem(this.storageKey)) {
+        localStorage.setItem(this.storageKey, JSON.stringify([]));
+      }
+    }
+  
+    addMessage(role, content) {
+      const message = new Message(role, content);
+      const currentList = this.getMessages();
+      currentList.push(message);
+      localStorage.setItem(this.storageKey, JSON.stringify(currentList));
+    }
+  
+    removeMessage(index) {
+      const currentList = this.getMessages();
+      if (index >= 0 && index < currentList.length) {
+        currentList.splice(index, 1);
+        localStorage.setItem(this.storageKey, JSON.stringify(currentList));
+      } else {
+        console.error('Invalid index');
+      }
+    }
+  
+    getMessages() {
+      return JSON.parse(localStorage.getItem(this.storageKey));
+    }
+  }
+  
+  // Usage
+  const messageList = new PersistentMessageList('messageList');
+  messageList.addMessage('user', 'Hello, world!');
+  messageList.addMessage('bot', 'Hi there!');
+  console.log(messageList.getMessages()); // [{role: "user", content: "Hello, world!"}, {role: "bot", content: "Hi there!"}]
+  messageList.removeMessage(0);
+  console.log(messageList.getMessages()); // [{role: "bot", content: "Hi there!"}]
+  
