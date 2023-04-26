@@ -150,8 +150,8 @@ const handleSubmit = async (e) => {
   console.log(promptMessages);
 
   // fetch data from server
-  //const response = await fetch('https://codeguru-q6df.onrender.com', {
-  const response = await fetch('http://localhost:5000', {
+  const response = await fetch('https://codeguru-q6df.onrender.com', {
+  //const response = await fetch('http://localhost:5000', {
     method: 'POST', 
     headers: {
       'Content-Type' : 'application/json'
