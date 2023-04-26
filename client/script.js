@@ -3,6 +3,7 @@ import user from './assets/user.svg';
 
 const form = document.querySelector('form');
 const chatContainer = document.querySelector('#chat_container');
+const messageList = new PersistentMessageList('messageList');
 
 let loadInterval;
 
@@ -71,6 +72,11 @@ const handleSubmit = async (e) => {
   //user's chatstripe
   chatContainer.innerHTML += chatStripe(false, data.get('prompt'));
 
+  // Usage
+
+  messageList.addMessage('user', data.get('prompt'));
+  console.log(messageList.getMessages()); 
+
   form.reset();
 
   //bot's chatstripe
@@ -100,6 +106,8 @@ const handleSubmit = async (e) => {
   if(response.ok) {
     const data = await response.json();
     const parsedData = data.bot.trim();
+    messageList.addMessage('bot', parsedData);
+    console.log(messageList.getMessages()); 
 
     typeText(messageDiv, parsedData);
   } else {
@@ -116,6 +124,7 @@ form.addEventListener('keyup', (e) => {
   }
 })
 
+// For storing messages to be used for context in the bot
 class Message {
   constructor(role, content) {
     this.role = role;
@@ -156,11 +165,3 @@ class PersistentMessageList {
     return JSON.parse(localStorage.getItem(this.storageKey));
   }
 }
-
-// Usage
-const messageList = new PersistentMessageList('messageList');
-messageList.addMessage('user', 'Hello, world!');
-messageList.addMessage('bot', 'Hi there!');
-console.log(messageList.getMessages()); // [{role: "user", content: "Hello, world!"}, {role: "bot", content: "Hi there!"}]
-messageList.removeMessage(0);
-console.log(messageList.getMessages()); // [{role: "bot", content: "Hi there!"}]
