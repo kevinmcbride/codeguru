@@ -4,7 +4,7 @@ import user from './assets/user.svg';
 const form = document.querySelector('form');
 const chatContainer = document.querySelector('#chat_container');
 
-// For storing messages to be used for context in the bot
+// For storing messages to be used for context in the call to the OpenAI API
 
 class Message {
   constructor(role, content) {
